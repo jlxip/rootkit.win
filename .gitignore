@@ -1,5 +1,7 @@
 venv/
+.venv/
+
 key
 key.pub
+
 src/__pycache__
-*.txt
