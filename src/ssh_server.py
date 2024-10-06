@@ -1,4 +1,5 @@
 import paramiko
+import traceback
 
 from src.server_base import ServerBase
 from src.ssh_server_interface import SshServerInterface
@@ -9,7 +10,7 @@ class SshServer(ServerBase):
     def __init__(self, host_key_file, host_key_file_password=None):
         super(SshServer, self).__init__()
 
-        self._host_key = paramiko.RSAKey.from_private_key_file(host_key_file, host_key_file_password)
+        self._host_key = paramiko.ed25519key.Ed25519Key.from_private_key_file(host_key_file, host_key_file_password)
 
     def connection_function(self, client):
         try:
@@ -28,11 +29,10 @@ class SshServer(ServerBase):
 
             # create the channel and get the stdio
             channel = session.accept()
-            stdio = channel.makefile('rwU')
 
             # create the client shell and start it
             # cmdloop() will block execution of this thread.
-            self.client_shell = Shell(stdio, stdio)
+            self.client_shell = Shell(channel)
             self.client_shell.cmdloop()
 
             # After execution continues, we can close the session
@@ -40,5 +40,5 @@ class SshServer(ServerBase):
             # cmdloop() is if we explicitly return True from it,
             # which we do with the bye command.
             session.close()
-        except:
-            pass
+        except Exception:
+            traceback.print_exc()
