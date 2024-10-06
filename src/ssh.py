@@ -27,10 +27,5 @@ class SshServerInterface(paramiko.ServerInterface):
     def check_channel_shell_request(self, channel: paramiko.Channel) -> bool:
         return True
 
-    def check_auth_password(self, username: str, password: str) -> int:
-        if (username == "admin") and (password == "password"):
-            return paramiko.common.AUTH_SUCCESSFUL
-        return paramiko.common.AUTH_FAILED
-
-    def get_banner(self) -> tuple[str, str]:
-        return ("My SSH Server\r\n", "en-US")
+    def check_auth_none(self, username: str) -> int:
+        return paramiko.common.AUTH_SUCCESSFUL

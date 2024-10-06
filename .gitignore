@@ -4,4 +4,4 @@ venv/
 key
 key.pub
 
-src/__pycache__
+**/__pycache__

