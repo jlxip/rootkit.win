@@ -58,14 +58,24 @@ class SshServer:
     def _listen(self) -> None:
         """Listening function"""
         assert self._socket is not None
+        self._socket.listen()
         while self._is_running.is_set():
             # This is terrible and can handle up to 1 connection at a time
             try:
-                self._socket.listen()
                 client, _addr = self._socket.accept()
-                self.connection_function(client)
-            except socket.timeout:
+
+                # Apparently paramiko can't handle non-blocking sockets during
+                # handshake, so I can't use epoll here. I'm doing accept-and-fork
+                # for now in lack of a better option. I doubt this gets enough
+                # attention as to need anything else.
+                threading.Thread(
+                    target=self.connection_function, args=(client,)
+                ).start()
+            except TimeoutError:
                 pass
+            except Exception:
+                print("--- AN EXCEPTION HAS OCCURRED: listen ---")
+                traceback.print_exc()
 
     def connection_function(self, client: socket.socket) -> None:
         """Connection handler"""
@@ -110,6 +120,5 @@ class SshServer:
                             break
                         os.write(fd, data)
             session.close()
-        except Exception:
-            print("--- AN EXCEPTION HAS OCCURRED ---")
-            traceback.print_exc()
+        except:
+            print("--- AN EXCEPTION HAS OCCURRED: connection_function ---")
